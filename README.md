@@ -31,10 +31,10 @@ The architecture maps raw infrastructure events directly into security intellige
 
 ---
 
-## 📂 Repository File Blueprint
+#### 📂 Repository File Blueprint
+* `index.html` — The interactive frontend dashboard that parses live metadata coordinates onto a dark-mode global mapping grid.
 * `lambda_function.py` — Core production-ready Python log parsing engine that isolates inbound brute-force telemetry.
 * `README.md` — Complete architectural specifications and system execution overview.
-
 ---
 
 ## 🎯 Strategic Professional Impact
