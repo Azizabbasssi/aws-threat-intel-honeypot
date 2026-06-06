@@ -47,4 +47,4 @@ def lambda_handler(event, context):
     except Exception as e:
         print(f"[ERROR] Failed to process incoming security log pipeline: {str(e)}")
         raise e
-      feat: add core lambda log parsing script
+
