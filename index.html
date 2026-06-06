@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Global Attack Intelligence - KHUSHII Agency</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 85vh; width: 100%; border-radius: 12px; border: 2px solid #30363d; }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; margin: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .status-badge { background: #238636; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.9em; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🌏 Global Cyber Attack Map</h1>
+        <div class="status-badge" id="counter">Initializing...</div>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        // 1. Setup the Map
+        const map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap & CartoDB'
+        }).addTo(map);
+
+        // 2. Your Automated Summary URL
+        const SUMMARY_URL = "https://aziz-cyber-project-logs-64499.s3.us-east-1.amazonaws.com/attacks/summary.json";
+
+        async function updateMap() {
+            try {
+                // Fetch the summary list from AWS
+                const response = await fetch(SUMMARY_URL + "?t=" + new Date().getTime());
+                if (!response.ok) throw new Error("Summary file not found");
+                
+                const attacks = await response.json();
+
+                // Update the counter text
+                document.getElementById('counter').innerText = `LIVE: ${attacks.length} Threats Detected`;
+
+                // Add a marker for every attack in the data
+                attacks.forEach(data => {
+                    L.circleMarker([data.lat, data.lon], {
+                        color: '#ff4444',
+                        fillColor: '#ff0000',
+                        fillOpacity: 0.5,
+                        radius: 10
+                    }).addTo(map)
+                    .bindPopup(`
+                        <div style="color:black">
+                            <strong>ATTACK DETECTED</strong><br>
+                            <b>IP:</b> ${data.ip}<br>
+                            <b>Location:</b> ${data.city}, ${data.country}<br>
+                            <b>Type:</b> ${data.threat}
+                        </div>
+                    `);
+                });
+
+            } catch (err) {
+                console.log("Waiting for Lambda to generate summary.json...", err);
+                document.getElementById('counter').innerText = "Status: Waiting for Data";
+            }
+        }
+
+        // Run now and refresh every 60 seconds
+        updateMap();
+        setInterval(updateMap, 60000);
+    </script>
+</body>
+</html>
